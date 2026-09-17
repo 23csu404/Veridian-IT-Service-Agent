@@ -16,8 +16,15 @@ supplied knowledge-base policies, and decides whether to **Resolve,
 Clarify, or Escalate**.
 """)
 
-employee = st.text_input("Employee Name", "Demo Employee")
-email = st.text_input("Employee Email", "employee@veridian-corp.example")
+employee = st.text_input(
+    "Employee Name",
+    "Demo Employee"
+)
+
+email = st.text_input(
+    "Employee Email",
+    "employee@veridian-corp.example"
+)
 
 message = st.text_area(
     "Describe your IT issue",
@@ -25,9 +32,13 @@ message = st.text_area(
 )
 
 if st.button("Analyze Request", type="primary"):
+
     if not message.strip():
+
         st.warning("Please enter an IT request.")
+
     else:
+
         result = run_agent(message)
 
         st.divider()
@@ -35,39 +46,65 @@ if st.button("Analyze Request", type="primary"):
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.metric("Intent", result.get("intent", "Unknown"))
+            st.metric(
+                "Intent",
+                result.get("intent", "Unknown")
+            )
 
         with col2:
-            st.metric("Decision", result.get("action", "CLARIFY"))
+            st.metric(
+                "Decision",
+                result.get("action", "CLARIFY")
+            )
 
         with col3:
             st.metric(
                 "Policy Source",
-                result.get("source_policy", "None")
+                result["source"]["id"]
+                if result.get("source")
+                else "None"
             )
 
         st.subheader("Agent Response")
 
         if result.get("response"):
+
             st.write(result["response"])
+
         elif result.get("message"):
+
             st.write(result["message"])
+
         else:
+
             st.json(result)
 
-        if result.get("policy"):
+        if result.get("source"):
+
             st.subheader("Policy Used")
-            st.info(str(result["policy"]))
+
+            policy = result["source"]
+
+            st.info(
+                f"**{policy['id']} — {policy['title']}**\n\n"
+                f"{policy['text']}"
+            )
 
         if result.get("audit"):
+
             st.subheader("Audit Trail")
+
             for item in result["audit"]:
+
                 if isinstance(item, dict):
+
                     st.write(
                         f"**{item.get('time', '')}** — "
                         f"{item.get('event', '')}"
                     )
+
                 else:
+
                     st.write(item)
 
 st.divider()
